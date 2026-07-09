@@ -11,11 +11,17 @@ app.use('/public', express.static(process.cwd() + '/public'));
 
 const upload = multer();
 
-app.get('/', function(req, res) {
+app.get('/', function (req, res) {
   res.sendFile(process.cwd() + '/views/index.html');
 });
 
-app.post('/api/fileanalyse', upload.single('upfile'), function(req, res) {
+app.post('/api/fileanalyse', upload.single('upfile'), function (req, res) {
+  console.log('ARCHIVO RECIBIDO:', req.file);
+
+  if (!req.file) {
+    return res.status(400).json({ error: 'No file uploaded' });
+  }
+
   res.json({
     name: req.file.originalname,
     type: req.file.mimetype,
@@ -23,6 +29,6 @@ app.post('/api/fileanalyse', upload.single('upfile'), function(req, res) {
   });
 });
 
-const listener = app.listen(process.env.PORT || 3000, function() {
+const listener = app.listen(process.env.PORT || 3000, function () {
   console.log('Your app is listening on port ' + listener.address().port);
 });
