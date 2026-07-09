@@ -9,17 +9,19 @@ const app = express();
 app.use(cors());
 app.use('/public', express.static(process.cwd() + '/public'));
 
-const upload = multer({ dest: 'uploads/' });
+const upload = multer();
 
 app.get('/', function (req, res) {
   res.sendFile(process.cwd() + '/views/index.html');
 });
 
 app.post('/api/fileanalyse', upload.single('upfile'), function (req, res) {
+  const file = req.file;
+
   res.json({
-    name: req.file.originalname,
-    type: req.file.mimetype,
-    size: req.file.size
+    name: file.originalname,
+    type: file.mimetype,
+    size: file.size
   });
 });
 
