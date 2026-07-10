@@ -3,32 +3,42 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const multer = require('multer');
+const path = require('path');
 
 const app = express();
 
 app.use(cors());
-app.use('/public', express.static(process.cwd() + '/public'));
 
-const upload = multer();
+app.use('/public', express.static(path.join(process.cwd(), 'public')));
 
-app.get('/', function (req, res) {
-  res.sendFile(process.cwd() + '/views/index.html');
+const upload = multer({
+  storage: multer.memoryStorage()
 });
 
-app.post('/api/fileanalyse', upload.single('upfile'), function (req, res) {
-  console.log('ARCHIVO RECIBIDO:', req.file);
+app.get('/', (req, res) => {
+  res.sendFile(path.join(process.cwd(), 'views', 'index.html'));
+});
 
-  if (!req.file) {
-    return res.status(400).json({ error: 'No file uploaded' });
+app.post('/api/fileanalyse', upload.any(), (req, res) => {
+  const file = req.files && req.files.length > 0 ? req.files[0] : null;
+
+  if (!file) {
+    return res.status(400).json({
+      error: 'No file uploaded'
+    });
   }
 
-  res.json({
-    name: req.file.originalname,
-    type: req.file.mimetype,
-    size: req.file.size
+  return res.status(200).json({
+    name: file.originalname,
+    type: file.mimetype,
+    size: file.size
   });
 });
 
-const listener = app.listen(process.env.PORT || 3000, function () {
-  console.log('Your app is listening on port ' + listener.address().port);
+const listener = app.listen(process.env.PORT || 3000, () => {
+  console.log(
+    'Your app is listening on port ' + listener.address().port
+  );
 });
+
+module.exports = app;
